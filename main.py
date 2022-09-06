@@ -20,7 +20,7 @@ args = parse_args()
 setup_logger(args.output_dir)
 logger.info(json.dumps(vars(args), indent=4))
 
-test_file = "test" if args.do_test else "validation"
+test_file = "test"
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -45,6 +45,7 @@ data_dir = data_dir = str(Path(args.data_dir).resolve())
 
 dataset_train = PrefixDataset(tokenizer, data_dir, 'train')
 dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=dataset_train.collate_fn)
+print(len(dataloader_train))
 
 dataset_test = PrefixDataset(tokenizer, data_dir, 'test')
 dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, collate_fn=dataset_test.collate_fn)
@@ -69,7 +70,6 @@ for epoch in range(args.n_epochs):
         optimizer.step()
         optimizer.zero_grad()
         model.zero_grad()
-        break
 
     with torch.no_grad():
 
@@ -82,8 +82,8 @@ for epoch in range(args.n_epochs):
 
         for step, (description, _, target) in enumerate(dataloader_test):
 
-            description = batch.to(device)
-            target = batch.to(device)
+            description = description.to(device)
+            target = target.to(device)
 
             outputs = model.generate(description, max_length=100, do_sample=True)
             output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -99,6 +99,9 @@ for epoch in range(args.n_epochs):
             save_data['model_inputs'].append(description)
             save_data['preds'].append(prediction)
             save_data['gts'].append(ground_truth)
+
+            if step == 20:
+                break
 
         prec, rec, acc, f1 = compute_metrics(save_data['preds'], save_data['gts'], 'entity_matching')
 

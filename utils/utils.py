@@ -30,8 +30,8 @@ def parse_args() -> argparse.Namespace:
         help="Overwrite sqlite cache of input/output results.",
     )
     parser.add_argument("--k", type=int, help="Number examples in prompt", default=1)
-    parser.add_argument("--batch_size", type=int, help="Batch size", default=4)
-    parser.add_argument("--n_epochs", type=int, help="Amount of epochs", default=1)
+    parser.add_argument("--batch_size", type=int, help="Batch size", default=16)
+    parser.add_argument("--n_epochs", type=int, help="Amount of epochs", default=10)
     parser.add_argument("--lr", type=float, help="Learning rate", default=0.0001)
     parser.add_argument(
         "--sample_method",
@@ -50,63 +50,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument(
-        "--class_balanced",
-        help="Class balance training data. Good for classification tasks \
-             with random prompts.",
-        action="store_true",
-    )
-    parser.add_argument(
         "--sep_tok",
         type=str,
         help="Separate for attr: val pairs in row. Default is '.'.",
         default=".",
     )
-    parser.add_argument(
-        "--nan_tok",
-        type=str,
-        help="Token to represent nan entries. Default is 'nan'.",
-        default="nan",
-    )
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        help="Which OpenAI model to use.",
-        default="text-davinci-002",
-        choices=[
-            "text-davinci-002",
-            "text-curie-001",
-            "text-babbage-001",
-            "text-ada-001",
-        ],
-    )
-    parser.add_argument(
-        "--num_run",
-        type=int,
-        help="Number examples to run through model.",
-        default=-1,
-    )
-    parser.add_argument(
-        "--num_trials",
-        type=int,
-        help="Number trials to run. Results will be averaged with variance reported.",
-        default=1,
-    )
-    parser.add_argument(
-        "--num_print",
-        type=int,
-        help="Number example prompts to print.",
-        default=10,
-    )
-    parser.add_argument(
-        "--add_task_instruction",
-        help="Add task instruction to the prompt before examples.",
-        action="store_true",
-    )
-    parser.add_argument("--do_test", help="Run on test file.", action="store_true")
-    parser.add_argument(
-        "--dry_run", help="Dry run. Do not actually ping model.", action="store_true"
-    )
-
     # Open AI args
     parser.add_argument("--temperature", type=float, help="Temperature.", default=0.0)
     parser.add_argument(
