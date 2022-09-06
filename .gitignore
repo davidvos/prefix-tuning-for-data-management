@@ -131,3 +131,5 @@ dmypy.json
 outputs/
 data/
 *.DS_Store
+lisa_job.sh
+*.out

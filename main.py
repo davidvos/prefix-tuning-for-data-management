@@ -82,15 +82,14 @@ for epoch in range(args.n_epochs):
 
         for step, (description, _, target) in enumerate(dataloader_test):
 
+            description = batch.to(device)
+            target = batch.to(device)
+
             outputs = model.generate(description, max_length=100, do_sample=True)
             output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
             
             try:
                 prediction = output_text.split('answer: ')[1]
-                if 'Yes' in prediction:
-                    prediction = 'Yes'
-                if 'No' in prediction:
-                    prediction = 'No'
             except:
                 prediction = ''
                 
@@ -100,9 +99,6 @@ for epoch in range(args.n_epochs):
             save_data['model_inputs'].append(description)
             save_data['preds'].append(prediction)
             save_data['gts'].append(ground_truth)
-
-            if step == 4:
-                break
 
         prec, rec, acc, f1 = compute_metrics(save_data['preds'], save_data['gts'], 'entity_matching')
 

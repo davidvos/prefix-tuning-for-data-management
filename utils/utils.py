@@ -131,8 +131,6 @@ def compute_metrics(preds: List, golds: List, task: str):
     """Compute metrics."""
     mets = {"tp": 0, "tn": 0, "fp": 0, "fn": 0, "crc": 0, "total": 0}
     for pred, label in zip(preds, golds):
-        print(label)
-        print(pred)
         label = label.strip().lower()
         pred = pred.strip().lower()
         mets["total"] += 1
