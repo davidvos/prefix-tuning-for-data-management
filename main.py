@@ -27,7 +27,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2') 
+tokenizer.pad_token = tokenizer.eos_token
 
 # Pre-Trained GPT-2 Model
 model = GPT2LMHeadModel.from_pretrained('gpt2', pad_token_id = tokenizer.eos_token_id).to(device)
@@ -39,15 +40,15 @@ if args.prefix_or_fine == 'prefix':
     for param in model.parameters():
         param.requires_grad=False
 
-    prefix_model = PrefixTuning(model.config) 
+    prefix_model = PrefixTuning(model.config, args.prefix_size) 
     prefix_model = prefix_model.to(device)
 
 data_dir = data_dir = str(Path(args.data_dir).resolve())
 
-dataset_train = PrefixDataset(tokenizer, data_dir, 'train')
+dataset_train = PrefixDataset(tokenizer, data_dir, args.prefix_size, 'train')
 dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=dataset_train.collate_fn)
 
-dataset_test = PrefixDataset(tokenizer, data_dir, 'test')
+dataset_test = PrefixDataset(tokenizer, data_dir, args.prefix_size, 'test')
 dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, collate_fn=dataset_test.collate_fn)
 
 optimizer = AdamW(model.parameters(), lr=args.lr)
@@ -64,6 +65,7 @@ for epoch in range(args.n_epochs):
     for step, (_, batch, _, attention_mask) in enumerate(dataloader_train):
 
         batch = batch.to(device)
+        attention_mask = attention_mask.to(device)
 
         if args.prefix_or_fine == 'prefix':
             prefix = prefix_model(batch_size=batch.shape[0], device=device)
@@ -93,7 +95,7 @@ for epoch in range(args.n_epochs):
         else:
             model.eval()
 
-        for step, (description, _, target) in enumerate(dataloader_test):
+        for step, (description, _, target, _) in enumerate(dataloader_test):
 
             description = description.to(device)
             target = target.to(device)

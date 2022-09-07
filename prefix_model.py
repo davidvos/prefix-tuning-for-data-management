@@ -4,16 +4,16 @@ import torch.nn as nn
 class PrefixTuning(nn.Module):
     """
     """
-    def __init__(self, base_config, preseqlen=5, hidden_dim=512):
+    def __init__(self, base_config, prefix_size, hidden_dim=512):
         super().__init__()
 
         # Config of Base (Pre-Trained) LM
         self.base_config=base_config
 
         # Input: 0, 1, 2 ... preseqlen
-        self.preseq=torch.arange(preseqlen)
+        self.preseq=torch.arange(prefix_size)
         # Embedding
-        self.embd=nn.Embedding(preseqlen,base_config.n_embd)
+        self.embd=nn.Embedding(prefix_size,base_config.n_embd)
         # Reparam
         self.reparam=nn.Sequential(
             nn.Linear(base_config.n_embd,hidden_dim),

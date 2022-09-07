@@ -29,6 +29,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite sqlite cache of input/output results.",
     )
+    parser.add_argument("--prefix_size", type=int, default=5)
     parser.add_argument('--prefix_or_fine', type=str, default='prefix')
     parser.add_argument("--k", type=int, help="Number examples in prompt", default=1)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=16)

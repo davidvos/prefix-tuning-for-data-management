@@ -5,8 +5,10 @@ from utils import data_utils, constants
 
 class PrefixDataset(Dataset):
     
-    def __init__(self, tokenizer, data_dir, split='train'):
+    def __init__(self, tokenizer, data_dir, prefix_size, split='train'):
         
+        self.prefix_size = prefix_size
+
         self.tokenizer = tokenizer
 
         # Read pandas DF datasets
@@ -32,7 +34,7 @@ class PrefixDataset(Dataset):
 
     def __getitem__(self, idx):
         final_examples = self.tokenizer.encode(self.final_examples[idx])
-        return self.tokenizer.encode(self.descriptions[idx]), final_examples['input_ids'], self.tokenizer.encode(self.targets[idx], final_examples['attention_mask'])
+        return self.tokenizer.encode(self.descriptions[idx]), self.tokenizer.encode(self.final_examples[idx]), self.tokenizer.encode(self.targets[idx])
 
     def collate_fn(self, batch):
         # """
@@ -45,21 +47,21 @@ class PrefixDataset(Dataset):
             if len(target)>max_len_label: max_len_label=len(target)
                 
         samples=[]
-        # attn_masks=[]
+        attn_masks=[]
         targets=[]
         descriptions=[]
         for description, sample, target in batch:
 
-            description.extend([self.tokenizer.eos_token_id]*(max_len_data-len(description)))
+            description.extend([self.tokenizer.pad_token_id]*(max_len_data-len(description)))
             descriptions.append(description)
 
-            sample.extend([self.tokenizer.eos_token_id]*(max_len_data-len(sample)))
+            sample.extend([self.tokenizer.pad_token_id]*(max_len_data-len(sample)))
             samples.append(sample)
             
-            # attn_mask=[int(e!=tokenizer.pad_token_id) for e in data]
-            # attn_masks.append(attn_mask)
+            attn_mask=[0 for e in range(self.prefix_size)] + [int(e!=self.tokenizer.pad_token_id) for e in sample]
+            attn_masks.append(attn_mask)
             
             target.extend([-100]*(max_len_label-len(target)))
             targets.append(target)
 
-        return torch.LongTensor(descriptions), torch.LongTensor(samples), torch.LongTensor(targets)
+        return torch.LongTensor(descriptions), torch.LongTensor(samples), torch.LongTensor(targets), torch.LongTensor(attn_masks)
