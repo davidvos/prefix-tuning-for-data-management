@@ -13,7 +13,7 @@ def parse_args() -> argparse.Namespace:
         "--data_dir",
         type=str,
         help="Which data directory to run.",
-        default="data/datasets/entity_matching/structured/Amazon-Google"
+        default="data/datasets/entity_matching/structured/iTunes-Amazon"
     )
     parser.add_argument(
         "--output_dir", type=str, help="Output directory.", default="outputs"
@@ -29,6 +29,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite sqlite cache of input/output results.",
     )
+    parser.add_argument('--prefix_or_fine', type=str, default='prefix')
     parser.add_argument("--k", type=int, help="Number examples in prompt", default=1)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=16)
     parser.add_argument("--n_epochs", type=int, help="Amount of epochs", default=10)

@@ -23,15 +23,16 @@ class PrefixDataset(Dataset):
         descriptions = examples['text'].apply(lambda x: x.strip())
         targets = examples['label_str'].apply(lambda x: x.rstrip('\n'))
 
-        self.descriptions = descriptions + ' answer: '
-        self.final_examples = descriptions + ' answer: ' + targets
+        self.descriptions = descriptions
+        self.final_examples = descriptions + ' ' + targets
         self.targets = targets
 
     def __len__(self):
         return len(self.final_examples)
 
     def __getitem__(self, idx):
-        return self.tokenizer.encode(self.descriptions[idx]), self.tokenizer.encode(self.final_examples[idx]), self.tokenizer.encode(self.targets[idx])
+        final_examples = self.tokenizer.encode(self.final_examples[idx])
+        return self.tokenizer.encode(self.descriptions[idx]), final_examples['input_ids'], self.tokenizer.encode(self.targets[idx], final_examples['attention_mask'])
 
     def collate_fn(self, batch):
         # """

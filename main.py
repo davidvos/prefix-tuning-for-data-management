@@ -33,19 +33,19 @@ tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 model = GPT2LMHeadModel.from_pretrained('gpt2', pad_token_id = tokenizer.eos_token_id).to(device)
 # Resize PLM's Embedding Layer
 model.resize_token_embeddings(len(tokenizer))
-# Freeze LM
-for param in model.parameters():
-    param.requires_grad=False
 
-prefix_model = PrefixTuning(model.config) 
+if args.prefix_or_fine == 'prefix':
+    # Freeze LM
+    for param in model.parameters():
+        param.requires_grad=False
 
-prefix_model = prefix_model.to(device)
+    prefix_model = PrefixTuning(model.config) 
+    prefix_model = prefix_model.to(device)
 
 data_dir = data_dir = str(Path(args.data_dir).resolve())
 
 dataset_train = PrefixDataset(tokenizer, data_dir, 'train')
 dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=dataset_train.collate_fn)
-print(len(dataloader_train))
 
 dataset_test = PrefixDataset(tokenizer, data_dir, 'test')
 dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, collate_fn=dataset_test.collate_fn)
@@ -56,20 +56,30 @@ for epoch in range(args.n_epochs):
 
     trial_metrics = {"prec": [], "rec": [], "f1": [], "acc": []}
 
-    prefix_model.train()
+    if args.prefix_or_fine == 'prefix':
+        prefix_model.train()
+    else: 
+        model.train()
 
-    for step, (_, batch, _) in enumerate(dataloader_train):
+    for step, (_, batch, _, attention_mask) in enumerate(dataloader_train):
 
         batch = batch.to(device)
 
-        prefix = prefix_model(batch_size=batch.shape[0], device=device)
-        outputs = model(batch, labels=batch, past_key_values=prefix)
+        if args.prefix_or_fine == 'prefix':
+            prefix = prefix_model(batch_size=batch.shape[0], device=device)
+            outputs = model(batch, labels=batch, attention_mask=attention_mask, past_key_values=prefix)
+        else:
+            outputs = model(batch, labels=batch, attention_mask=attention_mask)
         
         loss = outputs[0]
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        model.zero_grad()
+
+        if args.prefix_or_fine == 'prefix':
+            prefix_model.zero_grad()
+        else:
+            model.zero_grad()
 
     with torch.no_grad():
 
@@ -78,14 +88,22 @@ for epoch in range(args.n_epochs):
         save_data['preds'] = []
         save_data['gts'] = []
 
-        prefix_model.eval()
+        if args.prefix_or_fine == 'prefix':
+            prefix_model.eval()
+        else:
+            model.eval()
 
         for step, (description, _, target) in enumerate(dataloader_test):
 
             description = description.to(device)
             target = target.to(device)
 
-            outputs = model.generate(description, max_length=100, do_sample=True)
+            if args.prefix_or_fine == 'prefix':
+                prefix = prefix_model(batch_size=batch.shape[0], device=device)
+                outputs = model.generate(description, max_length=100, do_sample=True, past_key_values=prefix)
+            else:
+                outputs = model.generate(description, max_length=100, do_sample=True)
+            
             output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
             
             try:
