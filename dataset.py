@@ -1,11 +1,12 @@
 from torch.utils.data import Dataset
 import torch
+import random
 
 from utils import data_utils, constants
 
 class PrefixDataset(Dataset):
     
-    def __init__(self, tokenizer, data_dir, prefix_size, split='train'):
+    def __init__(self, tokenizer, data_dir, prefix_size, split='train', finetune_type='prefix'):
         
         self.prefix_size = prefix_size
 
@@ -21,20 +22,23 @@ class PrefixDataset(Dataset):
         )
 
         examples = pd_data_files[split]
-
+        
         descriptions = examples['text'].apply(lambda x: x.strip())
         targets = examples['label_str'].apply(lambda x: x.rstrip('\n'))
+        print(descriptions.iloc[61])
+        print(targets.iloc[61])
+        if finetune_type == 'prompt':
+            for index, description in enumerate(descriptions):
+                descriptions[index] = f'multirc question: {description} answer: Yes.'
 
         self.descriptions = descriptions
-        self.final_examples = descriptions + ' ' + targets
         self.targets = targets
 
     def __len__(self):
-        return len(self.final_examples)
+        return len(self.descriptions)
 
     def __getitem__(self, idx):
-        final_examples = self.tokenizer.encode(self.final_examples[idx])
-        return self.tokenizer.encode(self.descriptions[idx]), self.tokenizer.encode(self.final_examples[idx]), self.tokenizer.encode(self.targets[idx])
+        return self.tokenizer.encode(self.descriptions[idx]), self.tokenizer.encode(self.targets[idx])
 
     def collate_fn(self, batch):
         # """
@@ -42,26 +46,23 @@ class PrefixDataset(Dataset):
         # """
         max_len_data=0
         max_len_label=0
-        for description, sample, target in batch:
-            if len(sample)>max_len_data: max_len_data=len(sample)
+        for description, target in batch:
+            if len(description)>max_len_data: max_len_data=len(description)
             if len(target)>max_len_label: max_len_label=len(target)
                 
         samples=[]
         attn_masks=[]
         targets=[]
         descriptions=[]
-        for description, sample, target in batch:
+        for description, target in batch:
 
             description.extend([self.tokenizer.pad_token_id]*(max_len_data-len(description)))
             descriptions.append(description)
-
-            sample.extend([self.tokenizer.pad_token_id]*(max_len_data-len(sample)))
-            samples.append(sample)
             
-            attn_mask=[0 for e in range(self.prefix_size)] + [int(e!=self.tokenizer.pad_token_id) for e in sample]
+            attn_mask=[int(e!=self.tokenizer.pad_token_id) for e in description]
             attn_masks.append(attn_mask)
             
             target.extend([-100]*(max_len_label-len(target)))
             targets.append(target)
 
-        return torch.LongTensor(descriptions), torch.LongTensor(samples), torch.LongTensor(targets), torch.LongTensor(attn_masks)
+        return torch.LongTensor(descriptions), torch.LongTensor(attn_masks), torch.LongTensor(targets)

@@ -18,38 +18,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output_dir", type=str, help="Output directory.", default="outputs"
     )
-    parser.add_argument(
-        "--cache_file",
-        type=str,
-        help="File to cache input/output results.",
-        default="openai_cache.sqlite",
-    )
-    parser.add_argument(
-        "--overwrite_cache",
-        action="store_true",
-        help="Overwrite sqlite cache of input/output results.",
-    )
-    parser.add_argument("--prefix_size", type=int, default=5)
-    parser.add_argument('--prefix_or_fine', type=str, default='prefix')
+    parser.add_argument("--prefix_size", type=int, default=100)
+    parser.add_argument('--finetune_type', type=str, default='prefix')
+    parser.add_argument('--task', type=str, default='entity-matching')
     parser.add_argument("--k", type=int, help="Number examples in prompt", default=1)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=16)
-    parser.add_argument("--n_epochs", type=int, help="Amount of epochs", default=10)
-    parser.add_argument("--lr", type=float, help="Learning rate", default=0.0001)
-    parser.add_argument(
-        "--sample_method",
-        type=str,
-        help="Example generation method",
-        default="random",
-        choices=["random", "manual", "validation_clusters"],
-    )
-    parser.add_argument(
-        "--validation_path",
-        type=str,
-        default=None,
-        help="Path to validation data error feather file. I.e., the result of \
-            running `run_inference` of validation data. Used with \
-            validation_clusters method.",
-    )
+    parser.add_argument("--n_epochs", type=int, help="Amount of epochs", default=20)
+    parser.add_argument("--lr", type=float, help="Learning rate", default=5e-5)
     parser.add_argument("--seed", type=int, default=1234)
     parser.add_argument(
         "--sep_tok",
@@ -57,12 +32,6 @@ def parse_args() -> argparse.Namespace:
         help="Separate for attr: val pairs in row. Default is '.'.",
         default=".",
     )
-    # Open AI args
-    parser.add_argument("--temperature", type=float, help="Temperature.", default=0.0)
-    parser.add_argument(
-        "--max_tokens", type=int, help="Max tokens to generate.", default=3
-    )
-
     args = parser.parse_args()
     return args
 
@@ -80,6 +49,7 @@ def setup_logger(log_dir: str):
 def compute_metrics(preds: List, golds: List, task: str):
     """Compute metrics."""
     mets = {"tp": 0, "tn": 0, "fp": 0, "fn": 0, "crc": 0, "total": 0}
+
     for pred, label in zip(preds, golds):
         label = label.strip().lower()
         pred = pred.strip().lower()

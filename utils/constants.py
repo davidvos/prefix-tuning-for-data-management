@@ -100,7 +100,7 @@ DATA2SUFFIX = {
     f"{DATASET_PATH}/entity_matching/structured/DBLP-ACM": " Are Product A and Product B the same?",
     f"{DATASET_PATH}/entity_matching/structured/DBLP-GoogleScholar": " Are Product A and Product B the same?",
     f"{DATASET_PATH}/entity_matching/structured/Fodors-Zagats": " Are Product A and Product B the same?",
-    f"{DATASET_PATH}/entity_matching/structured/iTunes-Amazon": " Same Song?",
+    f"{DATASET_PATH}/entity_matching/structured/iTunes-Amazon": " Are Song A and Song B the same Song?",
     f"{DATASET_PATH}/entity_matching/structured/Walmart-Amazon": " Are A and B the Same?",
     f"{DATASET_PATH}/data_imputation/Buy": " Who is the manufacturer?",
     f"{DATASET_PATH}/data_imputation/Restaurant": " What is the city?",
