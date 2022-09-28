@@ -40,7 +40,7 @@ wandb:
 
 ## Run 
 
-To run training, evaluation and testing, execute the following commands. For --finetune-type, either choose 'prefix' or 'fine'. For --task, choose' entity-matching', 'error-detection' or 'data-imputation'.
+To run training, evaluation and testing, execute the following commands. For --finetune-type, either choose 'prefix' or 'fine'. For --task, choose' entity-matching', 'error-detection' or 'data-imputation'. Details on all possible arguments can be found in 'utils/utils.py'.
 
 ```
 python main.py \
@@ -51,6 +51,6 @@ python main.py \
     --n_samples 0 \
     --batch_size 16 \
     --n_epochs 10 \
-    --lr 5e-5
-    --seed 1234 \
+    --lr 5e-5 \
+    --seed 1234
 ```
