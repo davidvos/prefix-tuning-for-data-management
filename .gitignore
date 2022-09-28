@@ -134,3 +134,4 @@ data/
 lisa_job.sh
 *.out
 wandb/
+config.yaml

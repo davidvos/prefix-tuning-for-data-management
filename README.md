@@ -14,6 +14,12 @@ wget https://fm-data-tasks.s3.us-west-1.amazonaws.com/datasets.tar.gz -P data
 tar xvf data/datasets.tar.gz -C data/
 ```
 
+You should also create folders for output data, metrics and models.
+
+```
+mkdir -p outputs/{models,metrics,data} 
+```
+
 ### Install the necessary packages 
 ```
 pip install -e transformers/
@@ -22,10 +28,25 @@ pip install -r requirements.txt
 
 ### Setup
 
-Edit the config.yaml file to support WandB logging.
+Edit the config.yaml file to support WandB logging. If you want to run without WandB, please manually remove all WandB statements in main.py.
 
 ```
 wandb:
   project_name: '<YOUR WandB PROJECT NAME>'
   entity: '<YOUR WandB ENTITY NAME>'
+```
+
+## Run 
+
+```
+python main.py \
+    --data_dir 'data/datasets/entity_matching/structured/iTunes-Amazon' # Path to dataset you want to use \
+    --prefix_size 100 \
+    --finetune_type 'prefix' \
+    --task 'entity-matching' \
+    --n_samples 0 \
+    --batch_size 16 \
+    --n_epochs 10 \
+    --lr 5e-5
+    --seed 1234 \
 ```

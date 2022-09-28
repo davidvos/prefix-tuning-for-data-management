@@ -9,7 +9,7 @@ from rich.logging import RichHandler
 
 def parse_args() -> argparse.Namespace:
     """Generate args."""
-    parser = argparse.ArgumentParser(description="Simple calculator")
+    parser = argparse.ArgumentParser(description="Prefix-tuning for DM")
     parser.add_argument(
         "--data_dir",
         type=str,
