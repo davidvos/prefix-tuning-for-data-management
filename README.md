@@ -1,5 +1,7 @@
 # Prefix-tuning for entity matching, error detection and data imputation
 
+Our paper on prefix-tuning for data wrangling tasks is currently in review.
+
 Prefix-tuning is based on [this](https://github.com/XiangLi1999/PrefixTuning.git) paper and code by Li et al. The language modelling setup for data wrangling tasks is based on [this](https://github.com/HazyResearch/fm_data_tasks) paper and code by HazyResearch. The implementation of T5 is based on [this](https://github.com/ChainsmokersAI/Prompt-Tuning-on-ToTTo) project by ChainsmokersAI. 
 ## Instructions
 
@@ -38,10 +40,12 @@ wandb:
 
 ## Run 
 
+To run training, evaluation and testing, execute the following commands. For --finetune-type, either choose 'prefix' or 'fine'. For --task, choose' entity-matching', 'error-detection' or 'data-imputation'.
+
 ```
 python main.py \
-    --data_dir 'data/datasets/entity_matching/structured/iTunes-Amazon' # Path to dataset you want to use \
-    --prefix_size 100 \
+    --data_dir 'data/datasets/entity_matching/structured/iTunes-Amazon' \
+    --prefix_size 10 \
     --finetune_type 'prefix' \
     --task 'entity-matching' \
     --n_samples 0 \
