@@ -133,3 +133,4 @@ data/
 *.DS_Store
 lisa_job.sh
 *.out
+wandb/

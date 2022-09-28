@@ -2,20 +2,20 @@ import torch
 import torch.nn as nn
 
 class PrefixTuning(nn.Module):
-    """
-    """
+
     def __init__(self, pretrained_config, prompt_len=100, hidden_dim=512):
+        
         super().__init__()
         
         # Config of Pre-Trained LM
-        self.pretrained_config=pretrained_config
+        self.pretrained_config = pretrained_config
         
-        # torch.tensor([0, 1, 2, .. , prompt_len-1])
-        self.pre_prompt=torch.arange(prompt_len)
+        # torch.tensor([0, 1, 2, .. , prefix_len-1])
+        self.pre_prompt = torch.arange(prompt_len)
         # Embedding
-        self.embd=nn.Embedding(num_embeddings=prompt_len, embedding_dim=pretrained_config.d_model)
+        self.embd = nn.Embedding(num_embeddings=prompt_len, embedding_dim=pretrained_config.d_model)
         # Reparameterization
-        self.reparam=nn.Sequential(
+        self.reparam = nn.Sequential(
             nn.Linear(pretrained_config.d_model, hidden_dim),
             nn.Tanh(),
             nn.Linear(hidden_dim, pretrained_config.d_model)

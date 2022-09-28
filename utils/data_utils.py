@@ -326,9 +326,9 @@ def read_data(
     )
     if max_train_samples > 0:
         orig_train_len = len(data_files_sep["train"])
-        if max_train_samples > 1.0:
+        if max_train_samples > orig_train_len:
             raise ValueError("max_train_samples must be between 0 and 1")
-        max_examples = int(max_train_samples * orig_train_len)
+        max_examples = int(max_train_samples)
         data_files_sep["train"] = data_files_sep["train"].iloc[:max_examples]
         logger.info(
             f"Length of {data_dir} train is "

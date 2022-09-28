@@ -6,7 +6,7 @@ from utils import data_utils, constants
 
 class PrefixDataset(Dataset):
     
-    def __init__(self, tokenizer, data_dir, prefix_size, split='train', finetune_type='prefix'):
+    def __init__(self, tokenizer, data_dir, prefix_size, split='train', finetune_type='prefix', n_samples=0):
         
         self.prefix_size = prefix_size
 
@@ -22,14 +22,13 @@ class PrefixDataset(Dataset):
         )
 
         examples = pd_data_files[split]
-        
+
         descriptions = examples['text'].apply(lambda x: x.strip())
         targets = examples['label_str'].apply(lambda x: x.rstrip('\n'))
-        print(descriptions.iloc[61])
-        print(targets.iloc[61])
-        if finetune_type == 'prompt':
-            for index, description in enumerate(descriptions):
-                descriptions[index] = f'multirc question: {description} answer: Yes.'
+        
+        if n_samples > 0:
+            descriptions = descriptions[:n_samples]
+            targets = targets[:n_samples]
 
         self.descriptions = descriptions
         self.targets = targets
@@ -50,7 +49,6 @@ class PrefixDataset(Dataset):
             if len(description)>max_len_data: max_len_data=len(description)
             if len(target)>max_len_label: max_len_label=len(target)
                 
-        samples=[]
         attn_masks=[]
         targets=[]
         descriptions=[]

@@ -1,9 +1,10 @@
 """Misc utils."""
-import logging
-from pathlib import Path
-from typing import List
 import argparse
 
+import logging
+
+from pathlib import Path
+from typing import List
 from rich.logging import RichHandler
 
 def parse_args() -> argparse.Namespace:
@@ -21,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prefix_size", type=int, default=100)
     parser.add_argument('--finetune_type', type=str, default='prefix')
     parser.add_argument('--task', type=str, default='entity-matching')
-    parser.add_argument("--k", type=int, help="Number examples in prompt", default=1)
+    parser.add_argument("--n_samples", type=int, help="Ratio of training examples to use", default=0)
     parser.add_argument("--batch_size", type=int, help="Batch size", default=16)
     parser.add_argument("--n_epochs", type=int, help="Amount of epochs", default=20)
     parser.add_argument("--lr", type=float, help="Learning rate", default=5e-5)
